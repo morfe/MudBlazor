@@ -1385,6 +1385,29 @@ namespace MudBlazor.UnitTests.Components
         }
 
         /// <summary>
+        /// Bug : https://github.com/MudBlazor/MudBlazor/issues/10606
+        /// When the user inputs a single space, the required text field should show an error.
+        /// </summary>
+        [Test]
+        public void RequiredTextField_WhenInputOneSpace_ShowError()
+        {
+            // Arrange
+
+            var comp = Context.RenderComponent<MudTextField<string>>(parameters =>
+                parameters.Add(p => p.Required, true)
+            );
+            var textfield = comp.Instance;
+
+            // Act
+
+            comp.Find("input").Change(" ");
+
+            // Assert
+
+            textfield.Error.Should().BeTrue();
+        }
+
+        /// <summary>
         /// Required and aria-required TextField attributes should be dynamic.
         /// </summary>
         [Test]
@@ -1671,6 +1694,40 @@ namespace MudBlazor.UnitTests.Components
 
             comp.SetParametersAndRender(p => p.Add(x => x.ReadOnly, true)); //no clear button when readonly
             comp.FindAll(".mud-input-clear-button").Count.Should().Be(0);
+        }
+
+        [Test]
+        public void OutlineLegendRenderTest()
+        {
+            var comp = Context.RenderComponent<MudTextField<string>>(parameters => parameters
+                .Add(p => p.Variant, Variant.Outlined)
+                .Add(p => p.Label, "Test Label"));
+            var elem = comp.Find("legend");
+            elem.InnerHtml.Should().Be("Test Label");
+
+            comp = Context.RenderComponent<MudTextField<string>>(parameters => parameters
+                .Add(p => p.Variant, Variant.Outlined)
+                .Add(p => p.Label, ""));
+            Assert.Throws<ElementNotFoundException>(() =>
+            {
+                elem = comp.Find("legend");
+            });
+
+            comp = Context.RenderComponent<MudTextField<string>>(parameters => parameters
+                .Add(p => p.Variant, Variant.Outlined)
+                .Add(p => p.Mask, new PatternMask("0000"))
+                .Add(p => p.Label, "test"));
+            elem = comp.Find("legend");
+            elem.InnerHtml.Should().Be("test");
+
+            comp = Context.RenderComponent<MudTextField<string>>(parameters => parameters
+                .Add(p => p.Variant, Variant.Outlined)
+                .Add(p => p.Mask, new PatternMask("0000"))
+                .Add(p => p.Label, ""));
+            Assert.Throws<ElementNotFoundException>(() =>
+            {
+                elem = comp.Find("legend");
+            });
         }
 #nullable disable
     }
